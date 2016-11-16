@@ -58,9 +58,13 @@ def _setup_grps(root_grp, grps = [], additional = None):
        
         
 def create_particle(numParticles = 5):
-    
-    print 'Creating paticles'
-    
+    """
+    Creates an nParticle system connected to a surface and randomly emits the
+    passed in number of particles on that surface. 
+    If the surface already has a particle system attached to it, it will remove the 
+    initial state of the particles before emitting the new particles
+    :param numParticles: the number of particles that will be randomly attached to the surface 
+    """
     # before we start set the time back to the first frame
     tMin = int(cmds.playbackOptions(q=True, minTime=True))
     cmds.currentTime(tMin, e=True)
@@ -175,18 +179,8 @@ def create_particle(numParticles = 5):
         
         # make sure that particle system is empty
         if not npPart.count() == 0:
-            #npPart.setCount(0)
-            mDoubleArray = om.MDoubleArray()
-            for i in range(npPart.count()):
-                mDoubleArray.append(0.0)
+            _clear_intial_state(npPart, npDagPath)
             
-            npPart.setPerParticleAttribute('lifespanPP', mDoubleArray)
-            
-            mTime = om.MTime(tMin+1)
-            npPart.evaluateDynamics(mTime, False)
-            npPart.saveInitialState()
-            
-            cmds.currentTime(tMin, e=True)
             
         # setup the particle positions we want
         for i in range(numParticles):
@@ -212,8 +206,8 @@ def create_particle(numParticles = 5):
     # this allows the user ease of acces to re-seed their particles
     cmds.select(items)
         
-'''
-def set_goals(self):
+
+def set_goals():
     
     sel = cmds.ls(sl=True, l=True)
     
@@ -263,14 +257,14 @@ def set_goals(self):
     npFnPart = omfx.MFnParticleSystem(npDag)
     
     
-    if self._get_goal(npNode):
+    if _get_goal(npDag):
         print 'Particle system already has goal. For now we are only supporting one goal!'
         return
     
     cmds.goal(npSystem, g=obj, w=1)
     
     
-    self.set_initial_state(npNode, npFnPart)
+    set_initial_state(npNode, npFnPart)
     
     print '#------------------------------#'
     
@@ -319,73 +313,73 @@ def set_goals(self):
     # select our particle system to tidy things up
     cmds.select(npSystem)
     
- 
-def set_initial_state(self, npNode=None, npFnPart=None):
+
+def set_initial_state(npNode=None, npFnPart=None):
     """
     Given a particle dependency node calculate the start goalU and and goalV values
     :param npNode: Particle dependency node to get goal data from
     :param npFnPart: particle function set we can get the points from and set data
     """
-    
+    print '#----------------------------#'
     print 'Setting initial state'
     
     # before we start set the time back to the first frame
     tMin = int(cmds.playbackOptions(q=True, minTime=True))
     cmds.currentTime(tMin, e=True)
     
-    # a list of all the base attributes we want to make sure exist!
+    # a dict of all the base attributes we want to make sure exist!
     attrs = {'goalU': {'longName': 'goalU',
                        'shortName': 'goalU',
                        'initialState':True,  
-                       'type':om.MFnNumericData.kDoubleArray,
+                       'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                        'data': om.MDoubleArray()},
              'goalV': {'longName': 'goalV',
                        'shortName': 'goalV',
                        'initialState':True,
-                       'type':om.MFnNumericData.kDoubleArray,
+                       'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                        'data': om.MDoubleArray()},
              'verticalSpeedPP': {'longName': 'verticalSpeedPP',
                                  'shortName': 'vSpePP',
                                  'initialState':True,
-                                 'type':om.MFnNumericData.kDoubleArray,
+                                 'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                  'data': om.MDoubleArray()},
              'rotationRatePP': {'longName': 'rotationRatePP',
                                   'shortName': 'rotRtPP',
                                   'initialState':True,
-                                  'type':om.MFnNumericData.kDoubleArray,
+                                  'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                   'data': om.MDoubleArray()},
              'jitterIntervalPP': {'longName': 'jitterIntervalPP',
                                   'shortName': 'jtrIntPP',
                                   'initialState':True,
-                                  'type':om.MFnNumericData.kDoubleArray,
+                                  'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                   'data': om.MDoubleArray()},
              'jitterStepPP': {'longName': 'jitterStepPP',
                               'shortName': 'jtrStpPP',
                               'initialState':True,
-                              'type':om.MFnNumericData.kDoubleArray,
+                              'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                               'data': om.MDoubleArray()},
              'jitterRangePP': {'longName': 'jitterRangePP',
                                'shortName': 'jtrRngPP',
                                'initialState': True,
-                               'type': om.MFnNumericData.kDoubleArray,
+                               'type': om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                'data': om.MDoubleArray()},
              'jitterValuePP': {'longName': 'jitterValuePP',
                                'shortName': 'jtrValPP',
                                'initialState':True,
-                               'type':om.MFnNumericData.kDoubleArray,
+                               'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                'data': om.MDoubleArray()},
              'isDonePP': {'longName': 'isDonePP',
                                'shortName': 'isDonePP',
                                'initialState':True,
-                               'type':om.MFnNumericData.kDoubleArray,
+                               'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                'data': om.MDoubleArray()},
              'lifespanPP': {'longName': 'lifespanPP',
                                'shortName': 'lifespanPP',
                                'initialState':True,
-                               'type':om.MFnNumericData.kDoubleArray,
+                               'type':om.MFnNumericData.kDoubleArray,  # @UndefinedVariable
                                'data': om.MDoubleArray()}}
     
-    goalMeshFn = om.MFnMesh()
+    
     
     # if nothing passed in we assume we are updating intial state
     # so need to setup npNode and npFnPart from selection
@@ -426,12 +420,12 @@ def set_initial_state(self, npNode=None, npFnPart=None):
         npNode = om.MFnDependencyNode(npMObj)
         npFnPart = omfx.MFnParticleSystem(npDag)
     
-    
+    # make sure that we have a valid function set
     if npFnPart == None:
         print '###Error: Please make sure you pass in both a dependency node and function set or neither!'
         return
-        
-        
+    
+    
     # get the goalGeometry plug. this can tell us what our
     # particle is goaled to
     goalGeo_plug = npNode.findPlug('goalGeometry')
@@ -444,14 +438,14 @@ def set_initial_state(self, npNode=None, npFnPart=None):
     goalIndex = attrName.split('[')[-1].split(']')[0]
     
     # create the goal weight attribute
-    attrs['goalWeight%sPP' % goalIndex] = {'longName': 'goalWeight%sPP' % goalIndex,
-                                            'shortName': 'goalWeight%sPP' % goalIndex,
-                                            'initialState': True, 
-                                            'type':om.MFnNumericData.kDoubleArray,
-                                            'data': om.MDoubleArray()}
+    attrs['goalWeight{}PP'.format(goalIndex)] = {'longName': 'goalWeight%sPP' % goalIndex,
+                                                 'shortName': 'goalWeight%sPP' % goalIndex,
+                                                 'initialState': True, 
+                                                 'type':om.MFnNumericData.kDoubleArray,
+                                                 'data': om.MDoubleArray()}
     
     # make sure that all the attributes we need exist
-    self._create_attributes(npNode, attrs)
+    _create_attributes(npNode, attrs)
     
     # get all the objects connected to our goal array plug (should only be 1!)
     mPlugArray = om.MPlugArray()
@@ -461,30 +455,29 @@ def set_initial_state(self, npNode=None, npFnPart=None):
         print '###Error :More than one object is connected to this goal plug. Weird!'
         return
     
+    goalMeshFn = om.MFnMesh()
+    
     # get the node that is connected the plug and get a mesh function set
     goal_obj = mPlugArray[0].node()
     goal_dagpath = om.MDagPath().getAPathTo(goal_obj)
     goalMeshFn.setObject(goal_dagpath)
     
-    # setup a bunch of arrays we are about to calculate
-    partPosArray = om.MVectorArray()
-    
-    # get a list of all the points in our particle system and iterate through them
-    npFnPart.position(partPosArray)
-    
-    
     
     # get user defined variables
-    verticalOffset = self.ui.vertOffset_spinBox.value()
-    goalWeight_min = self.ui.goalWMin_spinBox.value()
-    goalWeight_max = self.ui.goalWMax_spinBox.value()
-    verticleSpeed_min = self.ui.vSpdMin_spinBox.value()
-    verticleSpeed_max = self.ui.vSpdMax_spinBox.value()
-    rotationSpeed = self.ui.rotSpd_spinBox.value()
-    jitterInterval = self.ui.jtrInt_spinBox.value()
-    jitterRange = self.ui.jtrRange_spinBox.value()
+    verticalOffset = 0
+    goalWeight_min = 0.2
+    goalWeight_max = 0.4
+    verticleSpeed_min = 0.005
+    verticleSpeed_max = 0.0075
+    rotationSpeed = 0.1
+    jitterInterval = 10
+    jitterRange = 0.01
     
+    # setup a bunch of arrays we are about to calculate
+    # then get a list of all the points in our particle system and iterate through them
+    partPosArray = om.MVectorArray()
     
+    npFnPart.position(partPosArray)
     
     # for each particle we want to calculate information on the intial state
     # for all of our pp attributes we want to set
@@ -540,7 +533,7 @@ def set_initial_state(self, npNode=None, npFnPart=None):
     # will overwrite their positions. Write a check in at the start of function)
     npFnPart.saveInitialState()       
 
-
+''' 
 def part2curve(self):
     """
     Converts a particle system in curves
@@ -1056,34 +1049,31 @@ def create_vine(self):
         
         item += 1
         selIter.next()
-
+'''
 
 #######################################################################
 ### Helper Functions
 #######################################################################
 
-def _get_goal(self, npNode=None, dg=None):
+def _get_goal(dg):
     """
     Gets the mObjects that are attached to the goalGeometry of an 
     nParticleSystem
-    :param npNode: dependency node of object we are look for goals
-                    if nothing passed in we will try and get it from the selection
-    
+    :param dg: dagPath of object we are looking for goals for
     :return: returns the first goal that we find or none if we can't find one
     """    
     
-    if not npNode:
-        if not dg:
-            print '###Error: Either a dependency node or dagPath needs to be passed in to get goal!'
-            return
+    print '#---------------------#'
+    print 'Getting goal'
+    
+    if not dg:
+        print '###Error: Either a dependency node or dagPath needs to be passed in to get goal!'
+        return
         
-        dg.extendToShape()
-        mObj = dg.node()
-        
-        npNode = om.MFnDependencyNode(mObj)
-        
-        
-        
+    dg.extendToShape()
+    mObj = dg.node()
+    
+    npNode = om.MFnDependencyNode(mObj)
     
     print npNode.name()
     
@@ -1129,7 +1119,7 @@ def _get_goal(self, npNode=None, dg=None):
     
     
 
-'''
+
 def _create_part(mFnDepend):
     
     npPart = omfx.MFnParticleSystem()
@@ -1280,9 +1270,52 @@ def _get_rand_point(dagPath):
     random_point = om.MPoint(random_point / total_weight)
     
     return random_point
+
+
+def _clear_intial_state(mFnPart, partDagPath):
+    """
+    Given an nParticle function set we want to clear the intial state of 
+    the particle system
+    """
+    # get the name of our particle system
+    nPart = mFnPart.particleName()
     
-'''
-def _create_attributes(self, npNode, attrs):
+    # get all the double array attributes
+    attrs = cmds.nParticle(nPart, q=True, ppd=True)
+    
+    for attr in attrs:
+        
+        # check to see if the attribute has an intial attribute and if it does we want
+        # to set that attr to 0
+        if cmds.attributeQuery('{}0'.format(attr), node=nPart, exists = True):
+            cmds.setAttr('{}.{}0'.format(nPart, attr),
+                         0,
+                         type = 'doubleArray')
+
+    # now get all the vector array attributes 
+    attrs = cmds.nParticle(nPart, q=True, ppv=True)
+    
+    for attr in attrs:
+        # check to see if the attribute has an intial state and if it does set it to 0
+        if cmds.attributeQuery('{}0'.format(attr), node=nPart, exists=True):
+            cmds.setAttr('{}.{}0'.format(nPart, attr),
+                            0,
+                            type='vectorArray')
+    
+    # now we want to reset a few more attributes
+    cmds.setAttr('{}.nid0'.format(nPart), 0)
+    cmds.setAttr('{}.particleId0'.format(nPart), 0, type='doubleArray')
+    cmds.setAttr('{}.age0'.format(nPart), 0, type='doubleArray')
+    
+    # we now need to re-evaluate the particle system to clear it out 
+    tMin = int(cmds.playbackOptions(q=True, minTime=True))
+    
+    cmds.currentTime(tMin+1, e=True)
+    cmds.currentTime(tMin, e=True)
+    
+
+
+def _create_attributes(npNode, attrs):
     """
     Given a dependency node will create a number of different attributes
     required
@@ -1296,6 +1329,7 @@ def _create_attributes(self, npNode, attrs):
     
     
     ### NB: Currently only create typed attributes!
+    print '#---------#'
     print 'creating new attributes!'
     mFnAttr = om.MFnTypedAttribute()
     
@@ -1316,7 +1350,7 @@ def _create_attributes(self, npNode, attrs):
                 npNode.addAttribute(custom0Attr)
 
 
-
+'''
 def _get_rotation(self, aimVector, normalVector=None, tangentVector=None, returnType = 'euler'):
     """
     Get the rotation as a vector from the three axis vectors that make up a rotation axis
